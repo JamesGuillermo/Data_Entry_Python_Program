@@ -2,6 +2,7 @@ from tkinter import *
 from ttkbootstrap.constants import *
 import ttkbootstrap as tb
 from ttkbootstrap.widgets import *
+from ttkbootstrap.widgets import DateEntry
 
 root = tb.Window(themename="superhero")
 root.title("Data Entry")
@@ -39,6 +40,9 @@ labelContactNumber.place(x=20, y=450, anchor="w")
 labelCompanyName = tb.Label(root, text="Company Name", font=("Helvetica", 15))
 labelCompanyName.place(x=20, y=500, anchor="w")
 
+labePrintData = tb.Label(root, text="", font=("Helvetica", 15))
+labePrintData.place(x=800, y=100, anchor="w")
+
 #Entrl widgets for data entry
 
 entryIDnumber = tb.Entry(root, width=30, bootstyle="primary")
@@ -74,11 +78,12 @@ def save_data():
     last_name = entryLastName.get()
     first_name = entryFirstName.get()
     middle_name = entryMiddleName.get()
-    birth_date = entryBirthDate.get()
+    birth_date_str = entryBirthDate.entry.get()  # Use .value to get the date
+    birth_date = datetime.strptime(birth_date_str, "%Y-%m-%d").date()
     contact_number = entryContactNumber.get()
     company_name = entryCompanyName.get()
 
-    save_data.append({
+    saved_data.append({
         "ID Number": id_number,
         "Last Name": last_name,
         "First Name": first_name,
@@ -86,12 +91,27 @@ def save_data():
         "Birth Date": birth_date,
         "Contact Number": contact_number,
         "Company Name": company_name})
+    
+def print_saved_data():
+    if saved_data:
+        # Show only the last entry, or format as needed
+        last = saved_data[-1]
+        text = (
+            f"ID: {last['ID Number']}, "
+            f"Name: {last['First Name']} {last['Middle Name']} {last['Last Name']}, "
+            f"Birth: {last['Birth Date']}, "
+            f"Contact: {last['Contact Number']}, "
+            f"Company: {last['Company Name']}"
+        )
+    else:
+        text = "No data saved."
+    labePrintData.config(text=text)
 
 buttonSave = tb.Button(root, text="Save Data", bootstyle="success", command=save_data)
 buttonSave.place(x=250, y=600, anchor="w")
 
-buttonPrint = tb.Button(root, text="Print Data", bootstyle="info", command=lambda: print(save_data))
-buttonPrint.place(x=350, y=600, anchor="w")
+buttonPrint = tb.Button(root, text="Print Data", bootstyle="info", command=print_saved_data)
+buttonPrint.place(x=370, y=600, anchor="w")
 
 
 
