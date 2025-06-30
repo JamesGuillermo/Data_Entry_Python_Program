@@ -65,6 +65,36 @@ entryContactNumber.place(x=250, y=450, anchor="w")
 entryCompanyName = tb.Combobox(root, textvariable=company_var, values=["Company A", "Company B", "Company C"], width=28, bootstyle="primary")
 entryCompanyName.place(x=250, y=500, anchor="w")
 
+#Button to submit data
+
+saved_data = []
+
+def save_data():
+    id_number = entryIDnumber.get()
+    last_name = entryLastName.get()
+    first_name = entryFirstName.get()
+    middle_name = entryMiddleName.get()
+    birth_date = entryBirthDate.get()
+    contact_number = entryContactNumber.get()
+    company_name = entryCompanyName.get()
+
+    save_data.append({
+        "ID Number": id_number,
+        "Last Name": last_name,
+        "First Name": first_name,
+        "Middle Name": middle_name,
+        "Birth Date": birth_date,
+        "Contact Number": contact_number,
+        "Company Name": company_name})
+
+buttonSave = tb.Button(root, text="Save Data", bootstyle="success", command=save_data)
+buttonSave.place(x=250, y=600, anchor="w")
+
+buttonPrint = tb.Button(root, text="Print Data", bootstyle="info", command=lambda: print(save_data))
+buttonPrint.place(x=350, y=600, anchor="w")
+
+
+
 
 
 root.mainloop()
