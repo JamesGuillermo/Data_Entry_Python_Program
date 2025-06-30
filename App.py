@@ -41,7 +41,7 @@ labelCompanyName = tb.Label(root, text="Company Name", font=("Helvetica", 15))
 labelCompanyName.place(x=20, y=500, anchor="w")
 
 labePrintData = tb.Label(root, text="", font=("Helvetica", 15))
-labePrintData.place(x=800, y=100, anchor="w")
+labePrintData.place(x=600, y=250, anchor="w")
 
 #Entrl widgets for data entry
 
@@ -97,10 +97,12 @@ def print_saved_data():
         # Show only the last entry, or format as needed
         last = saved_data[-1]
         text = (
-            f"ID: {last['ID Number']}, "
-            f"Name: {last['First Name']} {last['Middle Name']} {last['Last Name']}, "
-            f"Birth: {last['Birth Date']}, "
-            f"Contact: {last['Contact Number']}, "
+            f"ID: {last['ID Number']}\n"
+            f"Last Name: {last['First Name']}\n"
+            f"First Name: {last['Last Name']}\n"
+            f"Middle Name: {last['Middle Name']}\n"
+            f"Birth: {last['Birth Date']}\n"
+            f"Contact: {last['Contact Number']}\n"
             f"Company: {last['Company Name']}"
         )
     else:
