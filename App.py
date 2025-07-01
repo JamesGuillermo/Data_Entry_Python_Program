@@ -80,6 +80,7 @@ def save_data():
     middle_name = entryMiddleName.get()
     birth_date_str = entryBirthDate.entry.get()  # Use .value to get the date
     birth_date = datetime.strptime(birth_date_str, "%Y-%m-%d").date()
+    gender = entryGender.get()
     contact_number = entryContactNumber.get()
     company_name = entryCompanyName.get()
 
@@ -89,8 +90,18 @@ def save_data():
         "First Name": first_name,
         "Middle Name": middle_name,
         "Birth Date": birth_date,
+        "Gender": gender,
         "Contact Number": contact_number,
         "Company Name": company_name})
+    
+    entryIDnumber.delete(0, END)
+    entryLastName.delete(0, END)
+    entryFirstName.delete(0, END)
+    entryMiddleName.delete(0, END)
+    entryBirthDate.entry.delete(0, END)  # Clear the date entry
+    entryGender.set('')  # Clear the
+    entryContactNumber.delete(0, END)
+    entryCompanyName.set('')  # Clear the company name combobox
     
 def print_saved_data():
     if saved_data:
@@ -102,6 +113,7 @@ def print_saved_data():
             f"First Name: {last['Last Name']}\n"
             f"Middle Name: {last['Middle Name']}\n"
             f"Birth: {last['Birth Date']}\n"
+            f"Gender: {last['Gender']}\n"
             f"Contact: {last['Contact Number']}\n"
             f"Company: {last['Company Name']}"
         )
@@ -109,11 +121,34 @@ def print_saved_data():
         text = "No data saved."
     labePrintData.config(text=text)
 
+def SearchData():
+    input_id = entryIDnumber.get()
+    for entry in saved_data:
+        if entry["ID Number"] == input_id:
+            text = (
+                f"ID: {entry['ID Number']}\n"
+                f"Last Name: {entry['Last Name']}\n"
+                f"First Name: {entry['First Name']}\n"
+                f"Middle Name: {entry['Middle Name']}\n"
+                f"Birth: {entry['Birth Date']}\n"
+                f"Gender: {entry['Gender']}\n"
+                f"Contact: {entry['Contact Number']}\n"
+                f"Company: {entry['Company Name']}")
+            labePrintData.config(text=text)
+            break
+    else:
+        labePrintData.config(text="ID Number not found.")
+
+
+
 buttonSave = tb.Button(root, text="Save Data", bootstyle="success", command=save_data)
 buttonSave.place(x=250, y=600, anchor="w")
 
 buttonPrint = tb.Button(root, text="Print Data", bootstyle="info", command=print_saved_data)
 buttonPrint.place(x=370, y=600, anchor="w")
+
+buttonSearch = tb.Button(root, text="Search Data", bootstyle="warning", command=SearchData)
+buttonSearch.place(x=500, y=600, anchor="w")
 
 
 
