@@ -74,6 +74,7 @@ entryCompanyName.place(x=250, y=500, anchor="w")
 saved_data = []
 
 def save_data():
+
     id_number = entryIDnumber.get()
     last_name = entryLastName.get()
     first_name = entryFirstName.get()
@@ -83,6 +84,10 @@ def save_data():
     gender = entryGender.get()
     contact_number = entryContactNumber.get()
     company_name = entryCompanyName.get()
+
+    if id_number in [entry["ID Number"] for entry in saved_data]:
+        labePrintData.config(text="ID Number already exists.")
+        return
 
     saved_data.append({
         "ID Number": id_number,
@@ -135,9 +140,39 @@ def SearchData():
                 f"Contact: {entry['Contact Number']}\n"
                 f"Company: {entry['Company Name']}")
             labePrintData.config(text=text)
+            entryLastName.insert(0, entry["Last Name"])
+            entryFirstName.insert(0, entry["First Name"])
+            entryMiddleName.insert(0, entry["Middle Name"])
+            entryBirthDate.entry.insert(0, entry["Birth Date"].strftime("%Y-%m-%d"))  # Format date for entry
+            entryGender.set(entry["Gender"])
+            entryContactNumber.insert(0, entry["Contact Number"])
+            entryCompanyName.insert(0, entry["Company Name"])           
             break
     else:
         labePrintData.config(text="ID Number not found.")
+        entryLastName.delete(0, END)
+        entryFirstName.delete(0, END)
+        entryMiddleName.delete(0, END)
+        entryBirthDate.entry.delete(0, END)  # Clear the date entry
+        entryGender.set('')  # Clear the
+        entryContactNumber.delete(0, END)
+        entryCompanyName.set('')  # Clear the company name combobox
+
+
+def update_data():
+    input_id = entryIDnumber.get()
+    for entry in saved_data:
+        if entry["ID Number"] == input_id:
+            entry["Last Name"] = entryLastName.get()
+            entry["First Name"] = entryFirstName.get()
+            entry["Middle Name"] = entryMiddleName.get()
+            birth_date_str = entryBirthDate.entry.get()  # Use .value to get the date
+            entry["Birth Date"] = datetime.strptime(birth_date_str, "%Y-%m-%d").date()
+            entry["Gender"] = entryGender.get()
+            entry["Contact Number"] = entryContactNumber.get()
+            entry["Company Name"] = entryCompanyName.get()
+            labePrintData.config(text="Data updated successfully.")
+    return
 
 
 
@@ -150,8 +185,7 @@ buttonPrint.place(x=370, y=600, anchor="w")
 buttonSearch = tb.Button(root, text="Search Data", bootstyle="warning", command=SearchData)
 buttonSearch.place(x=500, y=600, anchor="w")
 
-
-
-
+buttonUpdate = tb.Button(root, text="Update Data", bootstyle="primary", command=update_data)
+buttonUpdate.place(x=620, y=600, anchor="w")
 
 root.mainloop()
