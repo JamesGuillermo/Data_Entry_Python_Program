@@ -189,3 +189,12 @@ buttonUpdate = tb.Button(root, text="Update Data", bootstyle="primary", command=
 buttonUpdate.place(x=620, y=600, anchor="w")
 
 root.mainloop()
+
+'''
+- Fix the search function to populate the form with the found data.
+- Add an update function to modify existing records.
+- Ensure the form clears after saving or updating data.
+- Add error handling for date parsing and empty fields.
+- Use a global list to store saved data.
+- Fix saving duplicate ID numbers.
+'''
