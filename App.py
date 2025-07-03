@@ -2,7 +2,7 @@ from tkinter import *
 from ttkbootstrap.constants import *
 import ttkbootstrap as tb
 from ttkbootstrap.widgets import *
-from ttkbootstrap.widgets import DateEntry
+import datetime
 
 root = tb.Window(themename="superhero")
 root.title("Data Entry")
@@ -66,7 +66,24 @@ entryGender.place(x=250, y=400, anchor="w")
 entryContactNumber = tb.Entry(root, width=30, bootstyle="primary")
 entryContactNumber.place(x=250, y=450, anchor="w")
 
-entryCompanyName = tb.Combobox(root, textvariable=company_var, values=["Company A", "Company B", "Company C"], width=28, bootstyle="primary")
+company_values = ["Company A", "Company B", "Company C"]
+entryCompanyName = tb.Combobox(root, textvariable=company_var, values=company_values, width=28, bootstyle="primary")
+
+def on_keyrelease(event):
+    value = event.widget.get()
+    value = value.strip().lower()
+    
+    if value == '':
+        data = company_values
+    else:
+        data = [item for item in company_values if value in item.lower()]
+    
+    entryCompanyName['values'] = data
+
+    
+
+entryCompanyName.bind('<KeyRelease>', on_keyrelease)
+
 entryCompanyName.place(x=250, y=500, anchor="w")
 
 #Button to submit data
@@ -80,10 +97,17 @@ def save_data():
     first_name = entryFirstName.get()
     middle_name = entryMiddleName.get()
     birth_date_str = entryBirthDate.entry.get()  # Use .value to get the date
-    birth_date = datetime.strptime(birth_date_str, "%Y-%m-%d").date()
+    
+    try:
+        birth_date = datetime.datetime.strptime(birth_date_str, "%Y-%m-%d").date()
+    except ValueError:
+        labePrintData.config(text="Invalid birth date format. Use YYYY-MM-DD.")
+        return
+   
     gender = entryGender.get()
     contact_number = entryContactNumber.get()
     company_name = entryCompanyName.get()
+    date_registered = datetime.date.today()
 
     if id_number in [entry["ID Number"] for entry in saved_data]:
         labePrintData.config(text="ID Number already exists.")
@@ -100,7 +124,8 @@ def save_data():
         "Birth Date": birth_date,
         "Gender": gender,
         "Contact Number": contact_number,
-        "Company Name": company_name})
+        "Company Name": company_name,
+        "Date Registered": date_registered})
     
     entryIDnumber.delete(0, END)
     entryLastName.delete(0, END)
@@ -123,7 +148,8 @@ def print_saved_data():
             f"Birth: {last['Birth Date']}\n"
             f"Gender: {last['Gender']}\n"
             f"Contact: {last['Contact Number']}\n"
-            f"Company: {last['Company Name']}"
+            f"Company: {last['Company Name']}\n"
+            f"Date Registered: {last['Date Registered']}"
         )
     else:
         text = "No data saved."
@@ -141,7 +167,9 @@ def SearchData():
                 f"Birth: {entry['Birth Date']}\n"
                 f"Gender: {entry['Gender']}\n"
                 f"Contact: {entry['Contact Number']}\n"
-                f"Company: {entry['Company Name']}")
+                f"Company: {entry['Company Name']}\n"
+                f"Date Registered: {entry['Date Registered']}")
+            
             entryLastName.delete(0, END)
             entryFirstName.delete(0, END)
             entryMiddleName.delete(0, END)
@@ -188,26 +216,26 @@ def update_data():
 
 def auto_generate_id():
     entryIDnumber.delete(0, END)  # Clear the entry field
-    formatted_id = f"ID-{len(saved_data) + 1:04d}" # Generate ID in the format ID-0001, ID-0002, etc.
+    formatted_id = f"ID{len(saved_data) + 1:04d}" # Generate ID in the format ID-0001, ID-0002, etc.
     return formatted_id
 
 
 
 
 buttonSave = tb.Button(root, text="Save Data", bootstyle="success", command=save_data)
-buttonSave.place(x=250, y=600, anchor="w")
+buttonSave.place(x=250, y=900, anchor="w")
 
 buttonPrint = tb.Button(root, text="Print Data", bootstyle="info", command=print_saved_data)
-buttonPrint.place(x=370, y=600, anchor="w")
+buttonPrint.place(x=370, y=900, anchor="w")
 
 buttonSearch = tb.Button(root, text="Search Data", bootstyle="warning", command=SearchData)
-buttonSearch.place(x=500, y=600, anchor="w")
+buttonSearch.place(x=500, y=900, anchor="w")
 
 buttonUpdate = tb.Button(root, text="Update Data", bootstyle="primary", command=update_data)
-buttonUpdate.place(x=620, y=600, anchor="w")
+buttonUpdate.place(x=620, y=900, anchor="w")
 
 buttonAutoID = tb.Button(root, text="Auto Generate ID Number", bootstyle="secondary", command=lambda: entryIDnumber.insert(0, auto_generate_id()))
-buttonAutoID.place(x=800, y=150, anchor="w")
+buttonAutoID.place(x=250, y=100, anchor="w")
 
 root.mainloop()
 
