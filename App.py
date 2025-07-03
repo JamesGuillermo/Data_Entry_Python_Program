@@ -88,6 +88,9 @@ def save_data():
     if id_number in [entry["ID Number"] for entry in saved_data]:
         labePrintData.config(text="ID Number already exists.")
         return
+    elif id_number == "":
+        labePrintData.config(text="Please enter ID number or click Auto Generate ID number.")
+        return
 
     saved_data.append({
         "ID Number": id_number,
@@ -139,7 +142,16 @@ def SearchData():
                 f"Gender: {entry['Gender']}\n"
                 f"Contact: {entry['Contact Number']}\n"
                 f"Company: {entry['Company Name']}")
+            entryLastName.delete(0, END)
+            entryFirstName.delete(0, END)
+            entryMiddleName.delete(0, END)
+            entryBirthDate.entry.delete(0, END)  # Clear the date entry
+            entryGender.set('')  # Clear the
+            entryContactNumber.delete(0, END)
+            entryCompanyName.set('')  # Clear the company name combobox
+
             labePrintData.config(text=text)
+
             entryLastName.insert(0, entry["Last Name"])
             entryFirstName.insert(0, entry["First Name"])
             entryMiddleName.insert(0, entry["Middle Name"])
@@ -174,6 +186,12 @@ def update_data():
             labePrintData.config(text="Data updated successfully.")
     return
 
+def auto_generate_id():
+    entryIDnumber.delete(0, END)  # Clear the entry field
+    formatted_id = f"ID-{len(saved_data) + 1:04d}" # Generate ID in the format ID-0001, ID-0002, etc.
+    return formatted_id
+
+
 
 
 buttonSave = tb.Button(root, text="Save Data", bootstyle="success", command=save_data)
@@ -188,10 +206,13 @@ buttonSearch.place(x=500, y=600, anchor="w")
 buttonUpdate = tb.Button(root, text="Update Data", bootstyle="primary", command=update_data)
 buttonUpdate.place(x=620, y=600, anchor="w")
 
+buttonAutoID = tb.Button(root, text="Auto Generate ID Number", bootstyle="secondary", command=lambda: entryIDnumber.insert(0, auto_generate_id()))
+buttonAutoID.place(x=800, y=150, anchor="w")
+
 root.mainloop()
 
 '''
-- Fix the search function to populate the form with the found data.
+- DONE = Fix the search function to populate the form with the found data.
 - Add an update function to modify existing records.
 - Ensure the form clears after saving or updating data.
 - Add error handling for date parsing and empty fields.
