@@ -2,6 +2,7 @@ from tkinter import *
 from ttkbootstrap.constants import *
 import ttkbootstrap as tb
 from ttkbootstrap.widgets import *
+from tkinter import END, Listbox
 import datetime
 
 root = tb.Window(themename="superhero")
@@ -66,25 +67,48 @@ entryGender.place(x=250, y=400, anchor="w")
 entryContactNumber = tb.Entry(root, width=30, bootstyle="primary")
 entryContactNumber.place(x=250, y=450, anchor="w")
 
-company_values = ["Company A", "Company B", "Company C"]
-entryCompanyName = tb.Combobox(root, textvariable=company_var, values=company_values, width=28, bootstyle="primary")
+company_values = [
+    "Company A", "Alpha Corp",
+    "Beta Logistics", "Company B",
+    "Gamma Solutions", "Delta Manufacturing",
+    "Company C", "Echo Energy"
+]
 
-def on_keyrelease(event):
-    value = event.widget.get()
-    value = value.strip().lower()
-    
-    if value == '':
-        data = company_values
-    else:
-        data = [item for item in company_values if value in item.lower()]
-    
-    entryCompanyName['values'] = data
-
-    
-
-entryCompanyName.bind('<KeyRelease>', on_keyrelease)
-
+entryCompanyName = tb.Entry(root, textvariable=company_var, width=28, bootstyle="primary")
 entryCompanyName.place(x=250, y=500, anchor="w")
+
+listbox = Listbox(root, height=2)
+listbox.place_forget()
+
+def update_list(event=None):
+    typed = entryCompanyName.get().lower()        # what the user has typed
+    listbox.delete(0, END)                        # clear old options
+
+    # Add back only items that contain the typed text
+    for item in company_values:
+        if typed in item.lower():                 # simple case-insensitive match
+            listbox.insert(END, item)
+
+    # Show or hide the list depending on whether we have matches
+    if listbox.size() > 0:
+        listbox.place(x=250, y=530, width=220)
+    else:
+        listbox.place_forget()
+
+entryCompanyName.bind("<KeyRelease>", update_list)    # run after every keystroke
+
+# ---------- 5. When the user clicks an option ----------
+def fill_out(event):
+    if listbox.curselection():
+        selected = listbox.get(listbox.curselection())
+        entryCompanyName.delete(0, END)           # clear the entry
+        entryCompanyName.insert(0, selected)      # insert the selected value
+        listbox.place_forget()                  # hide the dropdown
+
+listbox.bind("<<ListboxSelect>>", fill_out)
+
+# ---------- 6. Populate dropdown once at start ----------
+update_list()
 
 #Button to submit data
 
@@ -134,7 +158,7 @@ def save_data():
     entryBirthDate.entry.delete(0, END)  # Clear the date entry
     entryGender.set('')  # Clear the
     entryContactNumber.delete(0, END)
-    entryCompanyName.set('')  # Clear the company name combobox
+    entryCompanyName.delete(0, END)  # Clear the company name combobox
     
 def print_saved_data():
     if saved_data:
@@ -176,7 +200,7 @@ def SearchData():
             entryBirthDate.entry.delete(0, END)  # Clear the date entry
             entryGender.set('')  # Clear the
             entryContactNumber.delete(0, END)
-            entryCompanyName.set('')  # Clear the company name combobox
+            entryCompanyName.delete(0, END)  # Clear the company name combobox
 
             labePrintData.config(text=text)
 
@@ -196,8 +220,7 @@ def SearchData():
         entryBirthDate.entry.delete(0, END)  # Clear the date entry
         entryGender.set('')  # Clear the
         entryContactNumber.delete(0, END)
-        entryCompanyName.set('')  # Clear the company name combobox
-
+        entryCompanyName.delete(0, END)  # Clear the company name combobox
 
 def update_data():
     input_id = entryIDnumber.get()
@@ -206,8 +229,14 @@ def update_data():
             entry["Last Name"] = entryLastName.get()
             entry["First Name"] = entryFirstName.get()
             entry["Middle Name"] = entryMiddleName.get()
+
             birth_date_str = entryBirthDate.entry.get()  # Use .value to get the date
-            entry["Birth Date"] = datetime.strptime(birth_date_str, "%Y-%m-%d").date()
+            try:
+                entry["Birth Date"] = datetime.datetime.strptime(birth_date_str, "%Y-%m-%d").date()
+            except ValueError:
+                labePrintData.config(text="Invalid birth date format. Use YYYY-MM-DD.")
+                return
+            
             entry["Gender"] = entryGender.get()
             entry["Contact Number"] = entryContactNumber.get()
             entry["Company Name"] = entryCompanyName.get()

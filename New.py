@@ -12,9 +12,9 @@ root.title("Live‑Filter Combobox Demo")
 
 # Data you want to choose from
 COMPANIES = [
-    "Company A", "Company B", "Company C",
-    "Alpha Corp", "Beta Logistics", "Gamma Solutions",
-    "Delta Manufacturing", "Echo Energy"
+    "Company A", 
+    "Alpha Corp", "Beta Logistics", "Company B", "Gamma Solutions",
+    "Delta Manufacturing","Company C", "Echo Energy"
 ]
 
 # ---------- 2. Entry box where the user types ----------
@@ -24,7 +24,7 @@ entry = tb.Entry(root, textvariable=entry_var,
 entry.pack(pady=10)
 
 # ---------- 3. Listbox that shows possible matches ----------
-listbox = Listbox(root, height=6)       # sits under the Entry
+listbox = Listbox(root, height=2)       # sits under the Entry
 listbox.pack_forget()                      # start hidden
 
 # ---------- 4. Core logic: filter as you type ----------
