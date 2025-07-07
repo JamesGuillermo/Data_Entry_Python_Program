@@ -11,6 +11,7 @@ root.geometry("1500x1000")
 
 gender_var = StringVar()
 company_var = StringVar()
+transaction_var = StringVar()
 
 #Labels for data entry
 
@@ -40,6 +41,12 @@ labelContactNumber.place(x=20, y=450, anchor="w")
 
 labelCompanyName = tb.Label(root, text="Company Name", font=("Helvetica", 15))
 labelCompanyName.place(x=20, y=500, anchor="w")
+
+labelTransaction = tb.Label(root, text="Transaction", font=("Helvetica", 15))
+labelTransaction.place(x=20, y=600, anchor="w")
+
+labelCharges = tb.Label(root, text="Charges", font=("Helvetica", 15))
+labelCharges.place(x=20, y=700, anchor="w")
 
 labePrintData = tb.Label(root, text="", font=("Helvetica", 15))
 labePrintData.place(x=600, y=250, anchor="w")
@@ -111,6 +118,46 @@ listbox.bind("<<ListboxSelect>>", fill_out)
 update_list()
 
 #Button to submit data
+
+transaction_values = [
+    "Transaction A", "Transaction B", 
+    "Transaction C", "Transaction D"
+]
+
+entryTransaction = tb.Entry(root, textvariable=transaction_var, width=28, bootstyle="primary")
+entryTransaction.place(x=250, y=600, anchor="w")
+
+listboxTransaction = Listbox(root, height=2)
+listboxTransaction.place_forget()
+
+def update_transaction_list(event=None):
+    typed = entryTransaction.get().lower()        # what the user has typed
+    listboxTransaction.delete(0, END)             # clear old options
+
+    # Add back only items that contain the typed text
+    for item in transaction_values:
+        if typed in item.lower():                  # simple case-insensitive match
+            listboxTransaction.insert(END, item)
+
+    # Show or hide the list depending on whether we have matches
+    if listboxTransaction.size() > 0:
+        listboxTransaction.place(x=250, y=630, width=220)
+    else:
+        listboxTransaction.place_forget()
+
+entryTransaction.bind("<KeyRelease>", update_transaction_list)    # run after every keystroke
+
+def fill_out_transaction(event):
+    if listboxTransaction.curselection():
+        selected = listboxTransaction.get(listboxTransaction.curselection())
+        entryTransaction.delete(0, END)           # clear the entry
+        entryTransaction.insert(0, selected)      # insert the selected value
+        listboxTransaction.place_forget()         # hide the dropdown
+
+listboxTransaction.bind("<<ListboxSelect>>", fill_out_transaction)
+
+update_transaction_list()  # Populate dropdown once at start
+
 
 saved_data = []
 
@@ -248,6 +295,16 @@ def auto_generate_id():
     formatted_id = f"ID{len(saved_data) + 1:04d}" # Generate ID in the format ID-0001, ID-0002, etc.
     return formatted_id
 
+def clear_form():
+    entryIDnumber.delete(0, END)
+    entryLastName.delete(0, END)
+    entryFirstName.delete(0, END)
+    entryMiddleName.delete(0, END)
+    entryBirthDate.entry.delete(0, END)  # Clear the date entry
+    entryGender.set('')  # Clear the
+    entryContactNumber.delete(0, END)
+    entryCompanyName.delete(0, END)  # Clear the company name combobox
+    labePrintData.config(text="")
 
 
 
@@ -265,6 +322,9 @@ buttonUpdate.place(x=620, y=900, anchor="w")
 
 buttonAutoID = tb.Button(root, text="Auto Generate ID Number", bootstyle="secondary", command=lambda: entryIDnumber.insert(0, auto_generate_id()))
 buttonAutoID.place(x=250, y=100, anchor="w")
+
+buttonClear = tb.Button(root, text="Clear Form", bootstyle="danger", command=clear_form)
+buttonClear.place(x=750, y=900, anchor="w")
 
 root.mainloop()
 
