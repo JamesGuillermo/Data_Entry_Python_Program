@@ -2,7 +2,7 @@
 
 A desktop application built with **Python**, **Tkinter**, and **ttkbootstrap** for managing personal data records through a clean and responsive user interface.
 
-![image](https://github.com/user-attachments/assets/bf6ce4a1-71dd-4ead-8e3f-3e48ec06ff79)
+
 
 
 ## Features
@@ -16,7 +16,7 @@ A desktop application built with **Python**, **Tkinter**, and **ttkbootstrap** f
 
 ## Screenshots
 
-*(Add a screenshot of your app window here if you can)*
+![image](https://github.com/user-attachments/assets/bf6ce4a1-71dd-4ead-8e3f-3e48ec06ff79)
 
 ## In Progress / To-Do
 
