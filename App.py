@@ -12,6 +12,7 @@ root.geometry("1500x1000")
 gender_var = StringVar()
 company_var = StringVar()
 transaction_var = StringVar()
+chages_var = StringVar()
 
 #Labels for data entry
 
@@ -43,13 +44,13 @@ labelCompanyName = tb.Label(root, text="Company Name", font=("Helvetica", 15))
 labelCompanyName.place(x=20, y=500, anchor="w")
 
 labelTransaction = tb.Label(root, text="Transaction", font=("Helvetica", 15))
-labelTransaction.place(x=20, y=600, anchor="w")
+labelTransaction.place(x=20, y=610, anchor="w")
 
 labelCharges = tb.Label(root, text="Charges", font=("Helvetica", 15))
-labelCharges.place(x=20, y=700, anchor="w")
+labelCharges.place(x=20, y=710, anchor="w")
 
 labePrintData = tb.Label(root, text="", font=("Helvetica", 15))
-labePrintData.place(x=600, y=250, anchor="w")
+labePrintData.place(x=650, y=350, anchor="w")
 
 #Entrl widgets for data entry
 
@@ -125,7 +126,7 @@ transaction_values = [
 ]
 
 entryTransaction = tb.Entry(root, textvariable=transaction_var, width=28, bootstyle="primary")
-entryTransaction.place(x=250, y=600, anchor="w")
+entryTransaction.place(x=250, y=610, anchor="w")
 
 listboxTransaction = Listbox(root, height=2)
 listboxTransaction.place_forget()
@@ -141,7 +142,7 @@ def update_transaction_list(event=None):
 
     # Show or hide the list depending on whether we have matches
     if listboxTransaction.size() > 0:
-        listboxTransaction.place(x=250, y=630, width=220)
+        listboxTransaction.place(x=250, y=635, width=220)
     else:
         listboxTransaction.place_forget()
 
@@ -157,6 +158,43 @@ def fill_out_transaction(event):
 listboxTransaction.bind("<<ListboxSelect>>", fill_out_transaction)
 
 update_transaction_list()  # Populate dropdown once at start
+
+
+charges_values = [
+    "Charge A", "Charge B", 
+    "Charge C", "Charge D"
+]
+
+entryCharges = tb.Entry(root, textvariable=chages_var, width=28, bootstyle="primary")
+entryCharges.place(x=250, y=715, anchor="w")
+
+listboxCharges = Listbox(root, height=2)
+listboxCharges.place_forget()
+
+def update_charges_list(event=None):
+    typed = entryCharges.get().lower()        # what the user has typed
+    listboxCharges.delete(0, END)             # clear old options
+
+    # Add back only items that contain the typed text
+    for item in charges_values:
+        if typed in item.lower():              # simple case-insensitive match
+            listboxCharges.insert(END, item)
+
+    # Show or hide the list depending on whether we have matches
+    if listboxCharges.size() > 0:
+        listboxCharges.place(x=250, y=740, width=220)
+    else:
+        listboxCharges.place_forget()
+entryCharges.bind("<KeyRelease>", update_charges_list)    # run after every keystroke
+
+def fill_out_charges(event):
+    if listboxCharges.curselection():
+        selected = listboxCharges.get(listboxCharges.curselection())
+        entryCharges.delete(0, END)           # clear the entry
+        entryCharges.insert(0, selected)      # insert the selected value
+        listboxCharges.place_forget()         # hide the dropdown
+listboxCharges.bind("<<ListboxSelect>>", fill_out_charges)
+update_charges_list()  # Populate dropdown once at start
 
 
 saved_data = []
@@ -178,7 +216,9 @@ def save_data():
     gender = entryGender.get()
     contact_number = entryContactNumber.get()
     company_name = entryCompanyName.get()
-    date_registered = datetime.date.today()
+    dateTime_registered = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    transaction = entryTransaction.get()
+    charges = entryCharges.get()
 
     if id_number in [entry["ID Number"] for entry in saved_data]:
         labePrintData.config(text="ID Number already exists.")
@@ -196,7 +236,11 @@ def save_data():
         "Gender": gender,
         "Contact Number": contact_number,
         "Company Name": company_name,
-        "Date Registered": date_registered})
+        "Date Registered": dateTime_registered,
+        "Transaction": transaction,
+        "Charges": charges})
+    
+    labePrintData.config(text="Data saved successfully.")
     
     entryIDnumber.delete(0, END)
     entryLastName.delete(0, END)
@@ -206,6 +250,8 @@ def save_data():
     entryGender.set('')  # Clear the
     entryContactNumber.delete(0, END)
     entryCompanyName.delete(0, END)  # Clear the company name combobox
+    entryTransaction.delete(0, END)
+    entryCharges.delete(0, END)  # Clear the charges entry
     
 def print_saved_data():
     if saved_data:
@@ -220,7 +266,9 @@ def print_saved_data():
             f"Gender: {last['Gender']}\n"
             f"Contact: {last['Contact Number']}\n"
             f"Company: {last['Company Name']}\n"
-            f"Date Registered: {last['Date Registered']}"
+            f"Date Registered: {last['Date Registered']}\n"
+            f"Transaction: {last['Transaction']}\n"
+            f"Charges: {last['Charges']}"
         )
     else:
         text = "No data saved."
@@ -239,7 +287,8 @@ def SearchData():
                 f"Gender: {entry['Gender']}\n"
                 f"Contact: {entry['Contact Number']}\n"
                 f"Company: {entry['Company Name']}\n"
-                f"Date Registered: {entry['Date Registered']}")
+                f"Transaction: {entry['Transaction']}\n"
+                f"Charges: {entry['Charges']}\n")
             
             entryLastName.delete(0, END)
             entryFirstName.delete(0, END)
@@ -248,6 +297,8 @@ def SearchData():
             entryGender.set('')  # Clear the
             entryContactNumber.delete(0, END)
             entryCompanyName.delete(0, END)  # Clear the company name combobox
+            entryTransaction.delete(0, END)
+            entryCharges.delete(0, END)  # Clear the charges entry
 
             labePrintData.config(text=text)
 
@@ -257,7 +308,9 @@ def SearchData():
             entryBirthDate.entry.insert(0, entry["Birth Date"].strftime("%Y-%m-%d"))  # Format date for entry
             entryGender.set(entry["Gender"])
             entryContactNumber.insert(0, entry["Contact Number"])
-            entryCompanyName.insert(0, entry["Company Name"])           
+            entryCompanyName.insert(0, entry["Company Name"])    
+            entryTransaction.insert(0, entry["Transaction"])
+            entryCharges.insert(0, entry["Charges"])  # Populate the charges entry       
             break
     else:
         labePrintData.config(text="ID Number not found.")
@@ -268,6 +321,8 @@ def SearchData():
         entryGender.set('')  # Clear the
         entryContactNumber.delete(0, END)
         entryCompanyName.delete(0, END)  # Clear the company name combobox
+        entryTransaction.delete(0, END)
+        entryCharges.delete(0, END)  # Clear the charges entry
 
 def update_data():
     input_id = entryIDnumber.get()
@@ -287,6 +342,8 @@ def update_data():
             entry["Gender"] = entryGender.get()
             entry["Contact Number"] = entryContactNumber.get()
             entry["Company Name"] = entryCompanyName.get()
+            entry["Transaction"] = entryTransaction.get()
+            entry["Charges"] = entryCharges.get()
             labePrintData.config(text="Data updated successfully.")
     return
 
@@ -304,6 +361,8 @@ def clear_form():
     entryGender.set('')  # Clear the
     entryContactNumber.delete(0, END)
     entryCompanyName.delete(0, END)  # Clear the company name combobox
+    entryTransaction.delete(0, END)
+    entryCharges.delete(0, END)  # Clear the charges entry
     labePrintData.config(text="")
 
 
