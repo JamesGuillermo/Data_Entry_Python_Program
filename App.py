@@ -200,24 +200,18 @@ update_charges_list()  # Populate dropdown once at start
 
 saved_data = []
 path = "data_entries.xlsx"
+columns = [
+    "ID Number", "Last Name", "First Name", "Middle Name",
+    "Birth Date", "Gender", "Contact Number", "Company Name",
+    "Date Registered", "Transaction", "Charges"
+]
 
-if os.path.exists(path):
-    # If the file exists, read the data into saved_data
-    saved_data = pd.read_excel(path, engine='openpyxl').to_dict(orient='records')
-else:
-    # If the file does not exist, create an empty DataFrame
-    pd.DataFrame(columns=["ID Number",
-                          "Last Name", 
-                          "First Name",
-                          "Middle Name",
-                            "Birth Date",
-                            "Gender",
-                            "Contact Number",
-                            "Company Name",
-                            "Date Registered",
-                            "Transaction",
-                            "Charges"]).to_excel(path, index=False, engine='openpyxl')
+# Always ensure the file exists with headers
+if not os.path.exists(path):
+    pd.DataFrame(columns=columns).to_excel(path, index=False, engine='openpyxl')
 
+# Now read the file (even if just headers)
+saved_data = pd.read_excel(path, engine='openpyxl').to_dict(orient='records')
 old_data = pd.read_excel(path, engine='openpyxl')
 
 
@@ -300,16 +294,17 @@ def save_data(old=old_data):
     
 def print_saved_data():
   # Convert DataFrame to list of dictionaries
-    if saved_data:
+    global saved_data
+    saved_data = pd.read_excel(path, engine='openpyxl').to_dict(orient='records')
 
-        
+    if saved_data:
 
         # Show only the last entry, or format as needed
         last = saved_data[-1]
         text = (
             f"ID: {last['ID Number']}\n"
-            f"Last Name: {last['First Name']}\n"
-            f"First Name: {last['Last Name']}\n"
+            f"Last Name: {last['Last Name']}\n"
+            f"First Name: {last['First Name']}\n"
             f"Middle Name: {last['Middle Name']}\n"
             f"Birth: {last['Birth Date']}\n"
             f"Gender: {last['Gender']}\n"
@@ -322,6 +317,8 @@ def print_saved_data():
     else:
         text = "No data saved."
     labePrintData.config(text=text)
+
+    print(saved_data)
 
 def SearchData():
     input_id = entryIDnumber.get()
