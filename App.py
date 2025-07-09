@@ -4,6 +4,7 @@ import ttkbootstrap as tb
 from ttkbootstrap.widgets import *
 from tkinter import END, Listbox
 import datetime
+import os, pandas as pd
 
 root = tb.Window(themename="superhero")
 root.title("Data Entry")
@@ -198,8 +199,31 @@ update_charges_list()  # Populate dropdown once at start
 
 
 saved_data = []
+path = "data_entries.xlsx"
 
-def save_data():
+if os.path.exists(path):
+    # If the file exists, read the data into saved_data
+    saved_data = pd.read_excel(path, engine='openpyxl').to_dict(orient='records')
+else:
+    # If the file does not exist, create an empty DataFrame
+    pd.DataFrame(columns=["ID Number",
+                          "Last Name", 
+                          "First Name",
+                          "Middle Name",
+                            "Birth Date",
+                            "Gender",
+                            "Contact Number",
+                            "Company Name",
+                            "Date Registered",
+                            "Transaction",
+                            "Charges"]).to_excel(path, index=False, engine='openpyxl')
+
+old_data = pd.read_excel(path, engine='openpyxl')
+
+
+def save_data(old=old_data):
+
+    global saved_data
 
     id_number = entryIDnumber.get()
     last_name = entryLastName.get()
@@ -226,8 +250,8 @@ def save_data():
     elif id_number == "":
         labePrintData.config(text="Please enter ID number or click Auto Generate ID number.")
         return
-
-    saved_data.append({
+    
+    new_rows = pd.DataFrame([{
         "ID Number": id_number,
         "Last Name": last_name,
         "First Name": first_name,
@@ -238,7 +262,28 @@ def save_data():
         "Company Name": company_name,
         "Date Registered": dateTime_registered,
         "Transaction": transaction,
-        "Charges": charges})
+        "Charges": charges}])
+
+    combined = pd.concat([old, new_rows], ignore_index=True)
+
+    # Save the combined DataFrame to the Excel file
+    combined.to_excel(path, index=False, engine='openpyxl')
+    # Append the new data to the saved_data list
+
+    saved_data = pd.read_excel(path, engine='openpyxl').to_dict(orient='records')
+
+    '''saved_data.append({
+        "ID Number": id_number,
+        "Last Name": last_name,
+        "First Name": first_name,
+        "Middle Name": middle_name,
+        "Birth Date": birth_date,
+        "Gender": gender,
+        "Contact Number": contact_number,
+        "Company Name": company_name,
+        "Date Registered": dateTime_registered,
+        "Transaction": transaction,
+        "Charges": charges})'''
     
     labePrintData.config(text="Data saved successfully.")
     
@@ -254,7 +299,11 @@ def save_data():
     entryCharges.delete(0, END)  # Clear the charges entry
     
 def print_saved_data():
+  # Convert DataFrame to list of dictionaries
     if saved_data:
+
+        
+
         # Show only the last entry, or format as needed
         last = saved_data[-1]
         text = (
