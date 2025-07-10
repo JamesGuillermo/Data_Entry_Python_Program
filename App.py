@@ -294,11 +294,11 @@ def save_data(old=old_data):
     
 def print_saved_data():
   # Convert DataFrame to list of dictionaries
-    global saved_data
-    saved_data = pd.read_excel(path, engine='openpyxl').to_dict(orient='records')
+    
 
     if saved_data:
-
+        input_id = entryIDnumber.get()
+        df = pd.read_excel(path, engine='openpyxl')  # Load the current data
         # Show only the last entry, or format as needed
         last = saved_data[-1]
         text = (
@@ -318,9 +318,15 @@ def print_saved_data():
         text = "No data saved."
     labePrintData.config(text=text)
 
-    print(saved_data)
+    #print(saved_data)
+
+    for i, row in df.iterrows():
+        print(i)         # The row number
+
+    print(df.iterrows)  # All the data in that row
 
 def SearchData():
+   
     input_id = entryIDnumber.get()
     for entry in saved_data:
         if entry["ID Number"] == input_id:
@@ -370,28 +376,37 @@ def SearchData():
         entryTransaction.delete(0, END)
         entryCharges.delete(0, END)  # Clear the charges entry
 
+# ...existing code...
 def update_data():
-    input_id = entryIDnumber.get()
-    for entry in saved_data:
-        if entry["ID Number"] == input_id:
-            entry["Last Name"] = entryLastName.get()
-            entry["First Name"] = entryFirstName.get()
-            entry["Middle Name"] = entryMiddleName.get()
+    global saved_data
 
-            birth_date_str = entryBirthDate.entry.get()  # Use .value to get the date
+    input_id = entryIDnumber.get()
+    df = pd.read_excel(path, engine='openpyxl')  # Load the current data
+
+    for i, row in df.iterrows():
+        if str(row["ID Number"]) == input_id:
+            # Update the row with new values from the form
+            df.at[i, "Last Name"] = entryLastName.get()
+            df.at[i, "First Name"] = entryFirstName.get()
+            df.at[i, "Middle Name"] = entryMiddleName.get()
+            birth_date_str = entryBirthDate.entry.get()
             try:
-                entry["Birth Date"] = datetime.datetime.strptime(birth_date_str, "%Y-%m-%d").date()
+                df.at[i, "Birth Date"] = datetime.datetime.strptime(birth_date_str, "%Y-%m-%d").date()
             except ValueError:
                 labePrintData.config(text="Invalid birth date format. Use YYYY-MM-DD.")
                 return
-            
-            entry["Gender"] = entryGender.get()
-            entry["Contact Number"] = entryContactNumber.get()
-            entry["Company Name"] = entryCompanyName.get()
-            entry["Transaction"] = entryTransaction.get()
-            entry["Charges"] = entryCharges.get()
-            labePrintData.config(text="Data updated successfully.")
+            df.at[i, "Gender"] = entryGender.get()
+            df.at[i, "Contact Number"] = entryContactNumber.get()
+            df.at[i, "Company Name"] = entryCompanyName.get()
+            df.at[i, "Transaction"] = entryTransaction.get()
+            df.at[i, "Charges"] = entryCharges.get()
+            break
+
+    df.to_excel(path, index=False, engine='openpyxl')
+    saved_data = df.to_dict(orient='records')
+    labePrintData.config(text="Data updated successfully.")
     return
+# ...existing code...
 
 def auto_generate_id():
     entryIDnumber.delete(0, END)  # Clear the entry field
