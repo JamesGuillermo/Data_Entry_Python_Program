@@ -16,11 +16,11 @@ labelEntryTxtSize = 15
 xEntryBoxPos = 300
 yEntryBoxPos = 0
 
-companies = sqlite3.connect("companies.db")
+'''companies = sqlite3.connect("companies.db")
 companiesCursor = companies.cursor()
 companiesCursor.execute("CREATE TABLE IF NOT EXISTS companies (id INTEGER PRIMARY KEY, companyName TEXT)")
 companies.commit()
-companies.close()
+companies.close()'''
 
 def insert_company(name):
     conn = sqlite3.connect("companies.db")  # Open the DB
@@ -56,6 +56,35 @@ class MyApp(tb.Window):
         self.listbox_new = Listbox(self, width=width, height=height)
         self.listbox_new.place(anchor=addListboxAnch, x=xListboxPos, y=yListboxPos)
         return self.listbox_new
+    
+    def accessingDatabase(self, db_mode, db_name, db_table_name, db_column_defs_or_names, db_values=None):
+        if not db_name.endswith(".db"):
+            db_name += ".db"
+
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+
+        if db_mode.lower() == "create":
+        # Expecting full column definitions like ["companyName TEXT", "industry TEXT"]
+            columns_sql = ", ".join(db_column_defs_or_names)
+            cursor.execute(f"""
+                CREATE TABLE IF NOT EXISTS {db_table_name} (
+                    id INTEGER PRIMARY KEY,
+                    {columns_sql})""")
+    
+        elif db_mode.lower() == "insert":
+        # Expecting just column names like ["companyName", "industry"]
+            if not db_values:
+                raise ValueError("Insert mode requires db_values")
+
+            column_names = ", ".join(db_column_defs_or_names)
+            placeholders = ", ".join(["?"] * len(db_values))
+            sql = f"INSERT INTO {db_table_name} ({column_names}) VALUES ({placeholders})"
+            cursor.execute(sql, db_values)
+
+        conn.commit()
+        conn.close()
+
     
     def load_companies(self):
         # Connect to DB and get company names
@@ -118,6 +147,11 @@ transactionDateValue.config(text=transactionDate)
 entryCharges = app.entry_add(addEntryAnch=W, xEntryBoxPos=xEntryBoxPos, yEntryBoxPos=750, txtFont=labelEntryTxtFont)
 
 app.listbox_add(addListboxAnch=NW, xListboxPos=600, yListboxPos=130, width=50, height=3)
+
+#app.accessingDatabase("create", "companies.db", "companies", ["companyName TEXT"], db_values=None)
+db_companies = ["OpenAir", "Google", "Microsoft", "Amazon", "Apple", "Meta Platforms Inc", "Tesla Inc", "Nvidia Corp"]
+for company in db_companies:
+    app.accessingDatabase("insert", "companies.db", "companies", ["companyName"], db_values=(company,))
 
 
 
