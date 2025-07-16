@@ -65,13 +65,12 @@ class MyApp(tb.Window):
         cursor = conn.cursor()
 
         if db_mode.lower() == "create":
-        # Expecting full column definitions like ["companyName TEXT", "industry TEXT"]
+        # Expecting full column definitions like ["idCompany INTEGER PRIMARY KEY", "companyName TEXT"]
             columns_sql = ", ".join(db_column_defs_or_names)
             cursor.execute(f"""
                 CREATE TABLE IF NOT EXISTS {db_table_name} (
-                    id INTEGER PRIMARY KEY,
                     {columns_sql})""")
-    
+
         elif db_mode.lower() == "insert":
         # Expecting just column names like ["companyName", "industry"]
             if not db_values:
@@ -88,7 +87,7 @@ class MyApp(tb.Window):
     
     def load_companies(self):
         # Connect to DB and get company names
-        conn = sqlite3.connect("companies.db")
+        conn = sqlite3.connect("app1.db")
         cursor = conn.cursor()
         cursor.execute("SELECT companyName FROM companies")
         company_names = [row[0] for row in cursor.fetchall()]
@@ -149,9 +148,19 @@ entryCharges = app.entry_add(addEntryAnch=W, xEntryBoxPos=xEntryBoxPos, yEntryBo
 app.listbox_add(addListboxAnch=NW, xListboxPos=600, yListboxPos=130, width=50, height=3)
 
 #app.accessingDatabase("create", "companies.db", "companies", ["companyName TEXT"], db_values=None)
+'''db_companies = ["OpenAir", "Google", "Microsoft", "Amazon", "Apple", "Meta Platforms Inc", "Tesla Inc", "Nvidia Corp"]
+for company in db_companies:
+    app.accessingDatabase("insert", "companies.db", "companies", ["companyName"], db_values=(company,))'''
+    
+app.accessingDatabase("create", "app1.db", "companies", ["idCompany INTEGER PRIMARY KEY", "companyName TEXT"], db_values=None)
 db_companies = ["OpenAir", "Google", "Microsoft", "Amazon", "Apple", "Meta Platforms Inc", "Tesla Inc", "Nvidia Corp"]
 for company in db_companies:
-    app.accessingDatabase("insert", "companies.db", "companies", ["companyName"], db_values=(company,))
+    app.accessingDatabase("insert", "app1.db", "companies", ["companyName"], db_values=(company,))
+
+app.accessingDatabase("create", "app1.db", "transactions", ["idTransaction INTEGER PRIMARY KEY", "charges TEXT"], db_values=None)
+db_charges = ["Charge 1", "Charge 2", "Charge 3", "Charge 4", "Charge 5"]
+for charge in db_charges:
+    app.accessingDatabase("insert", "app1.db", "transactions", ["charges"], db_values=(charge,))
 
 
 
