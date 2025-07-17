@@ -99,6 +99,30 @@ class MyApp(tb.Window):
         for name in company_names:
             self.listbox_new.insert(END, name)
 
+    def load_database(self, db_name, db_table_name, db_column_defs_or_names, db_values=None):
+        if not db_name.endswith(".db"):
+            db_name += ".db"
+        
+        try:
+            conn = sqlite3.connect(db_name)
+            cursor = conn.cursor()
+
+            if db_values is None:
+                cursor.execute(f"SELECT {', '.join(db_column_defs_or_names)} FROM {db_table_name}")
+                rows = [row[0] for row in cursor.fetchall()]
+                self.listbox_new.delete(0, END)  # Clear the listbox before inserting
+                for row in rows:
+                    self.listbox_new.insert(END, row)
+            else:
+                cursor.execute(f"INSERT INTO {db_table_name} ({', '.join(db_column_defs_or_names)}) VALUES ({', '.join(['?'] * len(db_values))})", db_values)
+                conn.commit()
+
+            conn.close()
+        
+        except sqlite3.Error as e:
+            print(f"An error occurred: {e}")
+            return
+
     def empty_listbox(self):
         self.listbox_new.delete(0, END)
 
@@ -140,6 +164,7 @@ entryCompanies.bind("<FocusIn>", lambda event: app.load_companies())
 #entryCompanies.bind("<FocusOut>", lambda event: app.empty_listbox())
 
 entryTransaction = app.entry_add(addEntryAnch=W, xEntryBoxPos=xEntryBoxPos, yEntryBoxPos=650, txtFont=labelEntryTxtFont)
+entryTransaction.bind("<FocusIn>", lambda event: app.load_database("app1.db", "transactions", ["charges"], db_values=None))
 transactionDateValue = app.label_add("", addLabelAnch=W, xAddLabelPos=xEntryBoxPos, yAddLabelPos=700, txtFont=labelEntryTxtFont, txtSize=labelEntryTxtSize)
 transactionDate = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 transactionDateValue.config(text=transactionDate)
