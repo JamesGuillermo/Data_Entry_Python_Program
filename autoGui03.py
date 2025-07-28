@@ -4,7 +4,7 @@ import sys
 
 # Configuration - Easy to modify
 CONFIG = {
-    'id_number': '6083568',
+    'id_number': '40000845',
     'consultation_text': 'consultation',
     'default_delay': 0.1,
     'tab_delay': 0.1,
@@ -109,7 +109,7 @@ def main():
         # Step 8: Enter medicine information
         print("Step 8: Entering medicine information...")
         click_at('medicine_field', clicks=2)
-        type_text("elixer")
+        type_text("ramcar technology")
         pyautogui.press("enter")
         wait()
         
