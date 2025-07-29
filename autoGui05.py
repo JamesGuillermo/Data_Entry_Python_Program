@@ -16,7 +16,7 @@ from datetime import datetime
 class AutoGuiApp(tb.Window):
     def __init__(self):
         super().__init__(title="Auto GUI Application", themename="darkly")
-        self.geometry("800x600")
+        self.geometry("1700x1000")
         self.resizable(True, True)
         self.create_widgets()
         self.add_label("Mouse Position Tracker", "w", 0, 500, ("Arial", 16), "white")
