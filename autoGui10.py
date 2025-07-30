@@ -17,6 +17,7 @@ class AutoGuiApp(tb.Window):
         self.buttons = {}
         self.listboxes = {}
         self.comboboxes = {}
+        self.checkbuttons = {}
         self.anchor = "w"
         self.labelPosX = 30
         self.entryPosX = 300
@@ -74,6 +75,15 @@ class AutoGuiApp(tb.Window):
         )
         combobox.place(anchor=comboAnchor, x=comboPosX, y=comboPosY)
         return combobox
+    
+    def add_checkbutton(self, checkAnchor, checkPosX, checkPosY, text, variable):
+        checkbutton = tb.Checkbutton(
+            self, 
+            text=text, 
+            variable=variable
+        )
+        checkbutton.place(anchor=checkAnchor, x=checkPosX, y=checkPosY)
+        return checkbutton
 
     def create_widgets(self):
         # Existing labels, entries, comboboxes (excluding ID Number input if using Excel)
@@ -117,7 +127,7 @@ class AutoGuiApp(tb.Window):
         )
         self.comboboxes['notesRemarks'] = self.add_combobox(
             self.anchor, self.entryPosX, 500, 50, 12,
-            ["fc, consult", "fc, ff consult", "fc, consult, antigen", "fc, ftw"],
+            ["ape AM","ape AF","ape BM","ape BF","fc, consult", "fc, ff consult", "fc, consult, antigen", "fc, ftw"],
             state="normal"
         )
 
@@ -150,6 +160,25 @@ class AutoGuiApp(tb.Window):
             self.anchor, self.entryPosX, 700, "Save Entry to Excel", self.save_entry_to_excel
         )
 
+        self.checkbuttons['autoRemarks'] = self.add_checkbutton(
+            self.anchor, 1000, 250, "AM", 
+            variable=tb.BooleanVar(value=False)
+        )
+        self.checkbuttons['autoRemarks'] = self.add_checkbutton(
+            self.anchor, 1000, 300, "AF", 
+            variable=tb.BooleanVar(value=False)
+        )
+        self.checkbuttons['autoRemarks'] = self.add_checkbutton(
+            self.anchor, 1000, 350, "BM", 
+            variable=tb.BooleanVar(value=False)
+        )
+        self.checkbuttons['autoRemarks'] = self.add_checkbutton(
+            self.anchor, 1000, 400, "BF", 
+            variable=tb.BooleanVar(value=False)
+        )
+        self.checkbuttons['autoRemarks'].bind("<Button-1>", self.checkBoxesDependent)
+        
+
         self.label = tb.Label(self, text="", font=("Arial", 16), bootstyle="info")
         self.label.pack(pady=20)
 
@@ -177,6 +206,20 @@ class AutoGuiApp(tb.Window):
         """Event handler for registration type changes"""
         print("Registration type changed!")
         self.registrationTypeDependent()
+
+    def checkBoxesDependent(self):
+        """Update dependent comboboxes based on checkboxes"""
+        try:
+            if self.checkbuttons['autoRemarks'].get() == 1:  # Assuming this is a BooleanVar
+                print("Auto Remarks checkbox is checked")
+                # Logic to handle auto remarks
+                # For example, set default values or modify existing ones
+                self.comboboxes['notesRemarks'].set("ape AM")  # Example default value
+            else:
+                print("Auto Remarks checkbox is unchecked")
+                self.comboboxes['notesRemarks'].set("")  # Clear or reset value
+        except Exception as e:
+            print(f"Error in checkBoxesDependent: {e}")
 
     def registrationTypeDependent(self):
         """Update dependent comboboxes based on registration type"""
