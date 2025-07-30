@@ -303,12 +303,13 @@ class AutoGuiApp(tb.Window):
 
                 print("Step 9: Remarks and Notes")
                 typeText(DETAILS['notesRemarks'])
-                pressTabMultiple(3)
+                pressTabMultiple(1)
                 pyautogui.press('enter')
                 wait()
 
                 typeText("1")
                 pyautogui.press('enter')
+                time.sleep(2)
 
                 print("Automation completed successfully!")
 

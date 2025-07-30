@@ -5,6 +5,7 @@ import pyautogui
 import time
 import pandas as pd # Import pandas for Excel handling
 from datetime import datetime
+import os
 
 class AutoGuiApp(tb.Window):
     def __init__(self):
@@ -145,6 +146,10 @@ class AutoGuiApp(tb.Window):
         # Initially disable Stop button
         self.buttons["stopBatch"].config(state='disabled')
 
+        self.buttons["saveEntry"] = self.add_button(
+            self.anchor, self.entryPosX, 700, "Save Entry to Excel", self.save_entry_to_excel
+        )
+
         self.label = tb.Label(self, text="", font=("Arial", 16), bootstyle="info")
         self.label.pack(pady=20)
 
@@ -216,6 +221,53 @@ class AutoGuiApp(tb.Window):
             print(f"Error in registrationTypeDependent: {e}")
 
     # --- New Methods for Excel Integration ---
+    def save_entry_to_excel(self):
+        """Appends the current GUI data as a new row to the selected Excel file."""
+        file_path = self.entries['excelFile'].get()
+        if not file_path:
+            messagebox.showerror("Error", "Please select an Excel file first.")
+            return
+
+        # Gather data from GUI fields
+        new_data = {
+            "ID Number": self.entries['idNumber'].get(),
+            "Registration Type": self.comboboxes['registrationType'].get(),
+            "Transaction Type": self.comboboxes['transactionType'].get(),
+            "Service Type": self.comboboxes['serviceType'].get(),
+            "Company Name": self.comboboxes['companyName'].get(),
+            "Notes/Remarks": self.comboboxes['notesRemarks'].get()
+        }
+
+        # Create a DataFrame for the new row
+        new_row_df = pd.DataFrame([new_data])
+
+        try:
+            # Check if file exists
+            if os.path.exists(file_path):
+                # If file exists, read it, append the new row, and save
+                try:
+                    # Load existing data
+                    existing_df = pd.read_excel(file_path)
+
+                    # Ensure columns match or handle discrepancies if necessary
+                    # This simple approach assumes the structure is correct
+                    # A more robust version might check column names and order
+
+                    # Append the new row using concat (recommended over append)
+                    updated_df = pd.concat([existing_df, new_row_df], ignore_index=True)
+
+                    # Save the updated DataFrame back to Excel
+                    updated_df.to_excel(file_path, index=False)
+                    messagebox.showinfo("Success", "Data appended to Excel file successfully!")
+                except Exception as e:
+                    messagebox.showerror("Error", f"Failed to update existing Excel file:\n{e}")
+            else:
+                 # If file doesn't exist, create it with the new data
+                 # Ensure column order matches the expected structure
+                 new_row_df.to_excel(file_path, index=False)
+                 messagebox.showinfo("Success", "New Excel file created and data saved!")
+        except Exception as e:
+             messagebox.showerror("Error", f"An error occurred while saving:\n{e}")
 
     def browse_excel_file(self):
         """Open file dialog to select Excel file"""
