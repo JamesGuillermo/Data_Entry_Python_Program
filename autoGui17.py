@@ -669,13 +669,8 @@ class AutoGuiApp(tb.Window):
                         print(f"WARNING: Image file NOT found: {img_file}")
                 # --- End Debug ---
 
-                def useExistingRecord():
-                    """Handle the use existing record scenario"""
-                    print("Using existing record...")
-                    # Add your logic here for what to do when using existing record
-                    # For example, click OK or Continue button
-                    pyautogui.press('enter')  # or whatever action is needed
-                    time.sleep(1)
+                # Add this function if it doesn't exist in your class
+
 
                 # Replace the image detection section in your main() function with this improved version:
                 try:
@@ -724,39 +719,45 @@ class AutoGuiApp(tb.Window):
                     print("Image search completed.")
 
                     # Check for each image and act (in priority order)
-                    # Priority 1: No record found - stop processing
+                    # Priority 1: No record found - highest priority
                     if noRecordFoundLoc:
                         print("No Record found!")
                         print(f"Image located at: {noRecordFoundLoc}")
                         cancelOperation()
                         return # Stop processing this entry
                     
-                    # Priority 2: Use existing record - handle this first
+                    # Priority 2: Use existing record
                     elif useExistingRecordLoc:
                         print("Use Existing Record found!")
                         print(f"Image located at: {useExistingRecordLoc}")
+                        
+                        # First, use the existing record
                         useExistingRecord()
                         
-                        # After using existing record, wait and check for outstanding balance
+                        # Wait for the screen to update after using existing record
                         print("Waiting for screen to update after using existing record...")
-                        time.sleep(2)
+                        time.sleep(3)
                         
-                        # Check again for outstanding balance after using existing record
+                        # Now check for outstanding balance AFTER using existing record
                         try:
-                            withOutstandingBalanceLoc = pyautogui.locateOnScreen('withOutstandingBalance.png', confidence=0.8)
-                            if withOutstandingBalanceLoc:
+                            print("Checking for outstanding balance after using existing record...")
+                            withOutstandingBalanceLocAfter = pyautogui.locateOnScreen('withOutstandingBalance.png', confidence=0.8)
+                            if withOutstandingBalanceLocAfter:
                                 print("With outstanding balance found after using existing record!")
-                                print(f"Image located at: {withOutstandingBalanceLoc}")
+                                print(f"Image located at: {withOutstandingBalanceLocAfter}")
                                 withOutstandingBalanceProceed()
                                 time.sleep(1)
-                        except:
-                            print("No outstanding balance after using existing record")
+                            else:
+                                print("No outstanding balance after using existing record")
+                        except Exception as e:
+                            print(f"Error checking for outstanding balance after existing record: {e}")
                         
-                        # Continue with form registration
+                        # Finally, continue with form registration
+                        print("Continuing with form registration after using existing record...")
                         continueFormRegistaration()
                         return
                     
-                    # Priority 3: Outstanding balance - handle before form registration
+                    # Priority 3: Outstanding balance (without existing record)
                     elif withOutstandingBalanceLoc:
                         print("With outstanding balance!")
                         print(f"Image located at: {withOutstandingBalanceLoc}")
@@ -785,8 +786,6 @@ class AutoGuiApp(tb.Window):
                         time.sleep(2)
                         
                         # Try one more time with even lower confidence
-                        retry_found = False
-                        
                         try:
                             noRecordFoundLoc = pyautogui.locateOnScreen('noRecordFound.png', confidence=0.7)
                             if noRecordFoundLoc:
@@ -801,11 +800,11 @@ class AutoGuiApp(tb.Window):
                             if useExistingRecordLoc:
                                 print("Found 'Use Existing Record' on retry")
                                 useExistingRecord()
-                                time.sleep(2)
+                                time.sleep(3)
                                 # Check for outstanding balance after retry
                                 try:
-                                    withOutstandingBalanceLoc = pyautogui.locateOnScreen('withOutstandingBalance.png', confidence=0.7)
-                                    if withOutstandingBalanceLoc:
+                                    withOutstandingBalanceLocAfter = pyautogui.locateOnScreen('withOutstandingBalance.png', confidence=0.7)
+                                    if withOutstandingBalanceLocAfter:
                                         withOutstandingBalanceProceed()
                                         time.sleep(1)
                                 except:
@@ -835,7 +834,7 @@ class AutoGuiApp(tb.Window):
                         except:
                             pass
                         
-                        print("Still no images found after retry. Proceeding with default form registration.")
+                        print("Still no images found. Proceeding with default form registration.")
                         continueFormRegistaration()
                         return
 
