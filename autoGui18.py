@@ -122,17 +122,17 @@ class AutoGuiApp(tb.Window):
         )
         self.comboboxes['serviceType'] = self.add_combobox(
             self.anchor, self.entryPosX, 400, 50, 12,
-            ["consultation", "clearance", "pre-employment", "annual physical examination","laboratory"],
+            ["consultation", "clearance", "pre-employment", "annual physical examination","laboratory", "tele-consult"],
             state="readonly"
         )
         self.comboboxes['companyName'] = self.add_combobox(
             self.anchor, self.entryPosX, 450, 50, 12,
-            ["elixer", "philippine batteries inc", "ramcar technology inc", "evergreen", "sta. maria", "firstcore", "topspot", "poultrymax", "northpoint", "nutriforyou", "quantus"],
+            ["elixer", "philippine batteries inc", "ramcar technology inc", "evergreen", "sta. maria", "firstcore", "topspot", "poultrymax", "northpoint", "nutriforyou", "quantus", "san rafael", "subic"],
             state="readonly"
         )
         self.comboboxes['notesRemarks'] = self.add_combobox(
             self.anchor, self.entryPosX, 500, 50, 12,
-            ["ape AM","ape AF","ape BM","ape BF","fc, consult", "fc, ff consult", "fc, consult, antigen", "fc, ftw", "lab req"],
+            ["ape AM","ape AF","ape BM","ape BF","fc, consult", "fc, ff consult", "fc, consult, antigen", "fc, ftw", "lab req", "teleconsult", "fc, ff ape"],
             state="normal"
         )
 
@@ -272,7 +272,7 @@ class AutoGuiApp(tb.Window):
                 self.comboboxes['transactionType'].set("annual physical examination")
                 self.comboboxes['serviceType'].set("annual physical examination")
                 if not any(var.get() for var in self.auto_remarks_vars.values()):
-                    self.comboboxes['notesRemarks'].set("fc, ff annual physical examination") # Adjusted
+                    self.comboboxes['notesRemarks'].set("fc, ff ape") # Adjusted
             elif selected_value == "Lab request":
                 self.comboboxes['transactionType'].set("laboratory")
                 self.comboboxes['serviceType'].set("laboratory")
@@ -582,9 +582,9 @@ class AutoGuiApp(tb.Window):
 
         def continueFormRegistaration(): # Keeping typo for consistency
             
-            time.sleep(1)  # Wait for 0.5 seconds before starting
+            time.sleep(0.2)  # Wait for 0.5 seconds before starting
             print("Continuing with form registration...")
-            time.sleep(0.3)  # Wait for 1 second before starting
+            time.sleep(0.2)  # Wait for 1 second before starting
             print("Clicking on transaction type field")
             clickAt('transactionTypeLoc')
             time.sleep(0.2)
@@ -630,6 +630,132 @@ class AutoGuiApp(tb.Window):
             pressTabMultiple(1)
             pyautogui.press('enter')
 
+        def chargingServices():
+            """Handle charging services with proper delays and error handling"""
+            print("Starting charging services...")
+            
+            try:
+                # Click on charging services area
+                print("Clicking charging services button...")
+                pyautogui.click(1671, 564)
+                time.sleep(1)  # Increased delay
+                
+                # Check if stop flag is set
+                if self.stop_automation_flag:
+                    raise KeyboardInterrupt("Stopped by ESC key")
+                
+                # Type "nu" (presumably for nurse or something similar)
+                print("Typing 'nu'...")
+                typeText("nu")
+                time.sleep(1)  # Add delay after typing
+                
+                # Double click on coordinates (575,187)
+                print("Double clicking on selection...")
+                pyautogui.click(575, 187)
+                pyautogui.click(575, 187)
+                time.sleep(3)  # Increased delay
+                
+                # Check stop flag again
+                if self.stop_automation_flag:
+                    raise KeyboardInterrupt("Stopped by ESC key")
+                
+                # Click on another area
+                print("Clicking on form area...")
+                pyautogui.click(349, 859)
+                time.sleep(1)  # Increased delay
+                
+                # Click on input field
+                print("Clicking on input field...")
+                pyautogui.click(592, 153)
+                time.sleep(1)  # Increased delay
+                
+                # Check stop flag before processing charges
+                if self.stop_automation_flag:
+                    raise KeyboardInterrupt("Stopped by ESC key")
+                
+                # Get the notes/remarks for processing
+                notes_remarks = DETAILS['notesRemarks']
+                print(f"Processing charges for: {notes_remarks}")
+
+                #final step
+                def finalStep():
+                    pyautogui.click(1473, 1010)
+                    time.sleep(1)  # Increased delay
+                    typeText("1")
+                    pyautogui.press('enter')
+                
+                # Process different types of charges based on notes/remarks
+                if notes_remarks == "fc, consult" or notes_remarks == "fc, ff consult" or notes_remarks == "fc, ff pre-employment" or notes_remarks == "fc, ftw" or notes_remarks == "fc, ff ape":
+                    print("Adding consultation fee...")
+                    typeText("consultation fee")
+                    time.sleep(1)  # Add delay after typing
+                    
+                    pyautogui.click(283, 231)
+                    time.sleep(1)  # Increased delay
+                    
+                    pyautogui.press('enter')
+                    time.sleep(1)  # Add delay after enter
+                    print("Consultation fee added successfully")
+                    time.sleep(1)  # Increased delay
+                    finalStep()
+                    print("Final step completed successfully")
+                    return
+                    
+                elif notes_remarks == "fc, consult, antigen" or notes_remarks == "fc, ftw, antigen":
+                    print("Adding consultation fee with antigen...")
+                    
+                    # First charge: consultation fee
+                    typeText("consultation fee")
+                    time.sleep(1)
+                    pyautogui.click(283, 231)
+                    time.sleep(1)  # Increased delay
+                    
+                    # Check stop flag before second charge
+                    if self.stop_automation_flag:
+                        raise KeyboardInterrupt("Stopped by ESC key")
+                    
+                    # Second charge: antigen
+                    print("Adding second charge (antigen)...")
+                    
+                    pyautogui.click(592, 153)
+                    time.sleep(1)
+                    pyautogui.hotkey('ctrl', 'a')  # Select all text in the input field
+                    time.sleep(0.5)  # Short delay to ensure selection
+                    
+                    typeText("( won")
+                    time.sleep(1)
+                    pyautogui.click(283, 231)
+                    time.sleep(1)
+                    
+                    pyautogui.press('enter')
+                    time.sleep(1)
+                    print("Consultation fee and antigen added successfully")
+
+                    time.sleep(1)  # Increased delay
+                    finalStep()
+                    print("Final step completed successfully")
+                    return
+                
+                # If no matching condition, don't add any charges
+                else:
+                    print(f"No charging rule found for '{notes_remarks}', skipping charges...")
+                    return
+                    
+            except KeyboardInterrupt as e:
+                if "ESC" in str(e):
+                    print("Charging services interrupted by user (ESC key)")
+                else:
+                    print("Charging services interrupted by user (Ctrl+C)")
+                raise  # Re-raise to be handled by the main automation function
+                
+            except Exception as e:
+                print(f"Error in charging services: {e}")
+                print("Continuing with automation despite charging services error...")
+                return
+
+
+            
+
         def main():
             try:
                 print("Starting automated registration in 2 seconds...")
@@ -653,7 +779,7 @@ class AutoGuiApp(tb.Window):
                 pyautogui.press('tab')
                 wait()
                 print("Step 4: Navigating form fields")
-                pressTabMultiple(2, 0.3)
+                pressTabMultiple(2, 0.2)
                 pyautogui.press('enter')
 
                                 # --- Check stop flag ---
@@ -661,7 +787,7 @@ class AutoGuiApp(tb.Window):
                 # --- End Check stop flag ---
                 # --- SIGNIFICANT DELAY - Increase if necessary ---
                 print("Waiting for application to respond after ID entry... (6 seconds)")
-                time.sleep(2) # Try increasing this to 3, 4, or 5 seconds
+                time.sleep(1.5) # Try increasing this to 3, 4, or 5 seconds
                 # --- END DELAY ---
                 # --- Debug: Print current directory and check if files exist ---
                 #import os
@@ -741,7 +867,7 @@ class AutoGuiApp(tb.Window):
                         
                         # Wait for the screen to update after using existing record
                         print("Waiting for screen to update after using existing record...")
-                        time.sleep(3)
+                        time.sleep(2)
                         
                         # Now check for outstanding balance AFTER using existing record
                         try:
@@ -760,15 +886,20 @@ class AutoGuiApp(tb.Window):
                         # Finally, continue with form registration
                         print("Continuing with form registration after using existing record...")
                         continueFormRegistaration()
+                        time.sleep(4)
+                        chargingServices()
                         return
                     
                     # Priority 3: Outstanding balance (without existing record)
                     elif withOutstandingBalanceLoc:
+                        time.sleep(1)  # Wait a bit before clicking
                         print("With outstanding balance!")
                         print(f"Image located at: {withOutstandingBalanceLoc}")
                         withOutstandingBalanceProceed()
                         time.sleep(1) # Give time after clicking proceed
                         continueFormRegistaration()
+                        time.sleep(4)
+                        chargingServices()
                         return
                     
                     # Priority 4: Normal registration form
@@ -776,6 +907,8 @@ class AutoGuiApp(tb.Window):
                         print("Outpatient Registration Form")
                         print(f"Image located at: {outpatientRegistrationFormLoc}")
                         continueFormRegistaration()
+                        time.sleep(4)
+                        chargingServices()
                         return
                     
                     else:
