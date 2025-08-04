@@ -761,7 +761,7 @@ class AutoGuiApp(tb.Window):
                 print("Starting automated registration in 2 seconds...")
                 print("Press 'ESC' to attempt to stop automation.")
                 time.sleep(CONFIG['startUpDelay'])
-                # --- Check stop flag ---
+                # --- Check stop flag ---   
                 if self.stop_automation_flag: raise KeyboardInterrupt("Stopped by ESC key")
                 # --- End Check stop flag ---
                 print("Step 1: Opening new window")
@@ -864,7 +864,7 @@ class AutoGuiApp(tb.Window):
                         
                         # First, use the existing record
                         useExistingRecord()
-                        
+                     
                         # Wait for the screen to update after using existing record
                         print("Waiting for screen to update after using existing record...")
                         time.sleep(2)
@@ -878,6 +878,7 @@ class AutoGuiApp(tb.Window):
                                 print(f"Image located at: {withOutstandingBalanceLocAfter}")
                                 withOutstandingBalanceProceed()
                                 time.sleep(1)
+                                
                             else:
                                 print("No outstanding balance after using existing record")
                         except Exception as e:
