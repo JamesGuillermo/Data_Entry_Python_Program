@@ -117,6 +117,9 @@ class AutoGuiApp(tb.Window):
 
         # Form entries and comboboxes
         self.entries['idNumber'] = self.add_entry(self.anchor, self.entryPosX, 250, 50, ("Arial", 12))
+        # Bind event to auto-set company when ID number changes
+        self.entries['idNumber'].bind('<KeyRelease>', self.on_id_number_change)
+        self.entries['idNumber'].bind('<FocusOut>', self.on_id_number_change)
 
         self.comboboxes['registrationType'] = self.add_combobox(
             self.anchor, self.entryPosX, 300, 50, 12,
@@ -139,7 +142,7 @@ class AutoGuiApp(tb.Window):
         
         self.comboboxes['companyName'] = self.add_combobox(
             self.anchor, self.entryPosX, 450, 50, 12,
-            ["elixer", "philippine batteries inc", "ramcar technology inc", "evergreen", "sta. maria", "firstcore", "topspot", "poultrymax", "northpoint", "nutriforyou", "quantus", "san rafael", "subic", "whiteshield"],
+            ["elixer", "philippine batteries inc", "ramcar technology inc", "evergreen", "sta. maria", "firstcore", "topspot", "poultrymax", "northpoint", "nutriforyou", "quantus", "san rafael", "subic"],
             state="readonly"
         )
         
@@ -218,6 +221,59 @@ class AutoGuiApp(tb.Window):
         width, height = pyautogui.size()
         return f"Screen Size: {width}x{height}"
 
+    def id_number_format(self, id_number):
+        """Determine company based on ID number format"""
+        if not id_number:
+            return None
+            
+        id_number = str(id_number).strip()
+        
+        # Handle empty string after stripping
+        if not id_number:
+            return None
+            
+        id_number_length = len(id_number)
+        
+        # Define prefixes for different companies
+        id_elixer_prefix = ['601', '602', '603', '604', '605', '606', '607', '608', '609']
+        id_first_core_prefix = ['F1', 'F2', 'f1', 'f2']  # Added lowercase variants
+        id_philippine_batteries_inc_prefix = ['1000', '5700']
+        id_ramcar_technology_inc_prefix = ['4000']
+        id_evergreen_prefix = ['6000']
+        id_sta_maria_prefix = ['6800']
+
+        # Convert to uppercase for case-insensitive comparison with letter prefixes
+        id_number_upper = id_number.upper()
+
+        if id_number_length == 7:
+            if id_number.startswith(tuple(id_elixer_prefix)):
+                return "elixer"
+        elif id_number_length == 8:
+            if id_number_upper.startswith(tuple(prefix.upper() for prefix in id_first_core_prefix)):
+                return "firstcore"
+            elif id_number.startswith(tuple(id_philippine_batteries_inc_prefix)):
+                return "philippine batteries inc"
+            elif id_number.startswith(tuple(id_ramcar_technology_inc_prefix)):
+                return "ramcar technology inc"
+            elif id_number.startswith(tuple(id_evergreen_prefix)):
+                return "evergreen"
+            elif id_number.startswith(tuple(id_sta_maria_prefix)):
+                return "sta. maria"
+        
+        # Return None if no match found - let user choose manually
+        return None
+
+    def on_id_number_change(self, event=None):
+        """Event handler for ID number changes - auto-sets company"""
+        id_number = self.entries['idNumber'].get().strip()
+        if id_number:
+            company = self.id_number_format(id_number)
+            if company:
+                # Set the company in the combobox
+                self.comboboxes['companyName'].set(company)
+                print(f"Auto-set company to: {company} for ID: {id_number}")
+            # If company is None, don't change the current selection
+
     def on_registration_type_change(self, event=None):
         """Event handler for registration type changes"""
         self.registration_type_dependent()
@@ -288,7 +344,7 @@ class AutoGuiApp(tb.Window):
                     "transactionType": "fit to play",
                     "serviceType": "clearance",
                     "notesRemarks": "ftp"
-                }
+                },
             }
             
             if selected_value in type_mappings:
@@ -473,6 +529,7 @@ class AutoGuiApp(tb.Window):
         else:
             self.finish_batch()
 
+
     def finish_batch(self):
         """Called when all rows are processed or batch is stopped"""
         self.is_batch_running = False
@@ -642,9 +699,12 @@ class AutoGuiApp(tb.Window):
                     safe_wait(1)
                     type_text("1")
                     pyautogui.press('enter')
+                    pyautogui.click(1117,548)
+                    safe_wait(.5)
+                    pyautogui.press('enter')
                 
                 # Handle different charge types
-                consultation_charges = ["fc, consult", "fc, ff consult", "fc, ff pre-employment", "fc, ftw", "fc, ff ape", "ftp"]
+                consultation_charges = ["fc, consult", "fc, ff consult", "fc, ff pre-employment", "fc, ftw", "fc, ff ape","ftp"]
                 antigen_charges = ["fc, consult, antigen", "fc, ftw, antigen"]
                 
                 if notes_remarks in consultation_charges:
@@ -654,6 +714,9 @@ class AutoGuiApp(tb.Window):
                     safe_wait(1)
                     pyautogui.press('enter')
                     final_step()
+                    safe_wait(0.5)
+                    pyautogui.press('enter')
+
                     
                 elif notes_remarks in antigen_charges:
                     # First charge: consultation fee
@@ -673,6 +736,8 @@ class AutoGuiApp(tb.Window):
                     safe_wait(1)
                     pyautogui.press('enter')
                     final_step()
+                    safe_wait(0.5)
+                    pyautogui.press('enter')
                 
                 print("Charging services completed successfully!")
                 
