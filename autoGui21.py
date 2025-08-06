@@ -123,20 +123,20 @@ class AutoGuiApp(tb.Window):
 
         self.comboboxes['registrationType'] = self.add_combobox(
             self.anchor, self.entryPosX, 300, 50, 12,
-            ["Consult", "FF Consult", "FTW", "Pre-Emp", "FF Pre-Emp", "Travel Clearance", "APE", "FF APE", "Lab request", "ftp","xray"],
+            ["Consult", "FF Consult", "FTW", "Pre-Emp", "FF Pre-Emp", "Travel Clearance", "APE", "FF APE", "Lab request", "ftp"],
             state="readonly"
         )
         self.comboboxes['registrationType'].bind("<<ComboboxSelected>>", self.on_registration_type_change)
 
         self.comboboxes['transactionType'] = self.add_combobox(
             self.anchor, self.entryPosX, 350, 50, 12,
-            ["consultation", "follow-up consultation", "fit to work", "pre-employment", "for entry", "annual physical examination", "laboratory", "fit to play","xray"],
+            ["consultation", "follow-up consultation", "fit to work", "pre-employment", "for entry", "annual physical examination", "laboratory", "fit to play"],
             state="readonly"
         )
         
         self.comboboxes['serviceType'] = self.add_combobox(
             self.anchor, self.entryPosX, 400, 50, 12,
-            ["consultation", "clearance", "pre-employment", "annual physical examination", "laboratory", "tele-consult","xray"],
+            ["consultation", "clearance", "pre-employment", "annual physical examination", "laboratory", "tele-consult"],
             state="readonly"
         )
         
@@ -148,7 +148,7 @@ class AutoGuiApp(tb.Window):
         
         self.comboboxes['notesRemarks'] = self.add_combobox(
             self.anchor, self.entryPosX, 500, 50, 12,
-            ["ape AM", "ape AF", "ape BM", "ape BF", "fc, consult", "fc, ff consult", "fc, consult, antigen", "fc, ftw", "lab req", "teleconsult", "fc, ff ape", "ftp","xray"],
+            ["ape AM", "ape AF", "ape BM", "ape BF", "fc, consult", "fc, ff consult", "fc, consult, antigen", "fc, ftw", "lab req", "teleconsult", "fc, ff ape", "ftp"],
             state="normal"
         )
 
@@ -353,11 +353,6 @@ class AutoGuiApp(tb.Window):
                     "serviceType": "clearance",
                     "notesRemarks": "ftp"
                 },
-                "xray": {
-                    "transactionType": "xray",
-                    "serviceType": "xray",
-                    "notesRemarks": "xray"
-                }
             }
             
             if selected_value in type_mappings:
@@ -580,7 +575,7 @@ class AutoGuiApp(tb.Window):
         self.start_escape_listener()
         
         try:
-            self.run_automation(details)
+            self.run_registration_automation(details)
         finally:
             self.listener_active = False
 
@@ -929,6 +924,250 @@ class AutoGuiApp(tb.Window):
             self.listener_active = False
             print(f"Automation completed for ID: {details['idNumber']}")
 
+
+
+
+
+    def run_registration_automation(self, details):
+        """Core automation logic"""
+        print(f"Starting automation for ID: {details['idNumber']}")
+        
+        # Automation coordinates and configuration
+        coordinates = {
+            'xy1': (237, 890), 'xy2': (268, 881), 'xy3': (591, 182),
+            'xy4': (215, 893), 'xy5': (249, 927), 'xy6': (561, 184),
+            'xy7': (239, 966), 'transactionTypeLoc': (490, 582),
+            'serviceTypeLoc': (925, 478), 'asdLoc': (260, 881),
+            'asdLoc2': (592, 184), 'companyNameLoc': (265, 918),
+            'companyNameLoc2': (611, 184), 'notesRemarksLoc': (269, 962),
+        }
+        
+        config = {
+            'defaultDelay': 0.1, 'tabDelay': 0.1,
+            'moveDelay': 0.5, 'startUpDelay': 2
+        }
+
+        def safe_wait(duration=None):
+            if self.stop_automation_flag:
+                raise KeyboardInterrupt("Stopped by ESC key")
+            time.sleep(duration or config['defaultDelay'])
+
+        def press_tab_multiple(count, delay=None):
+            for _ in range(count):
+                if self.stop_automation_flag:
+                    raise KeyboardInterrupt("Stopped by ESC key")
+                pyautogui.press('tab')
+                safe_wait(delay or config['tabDelay'])
+
+        def click_at(coord_key, clicks=1):
+            if self.stop_automation_flag:
+                raise KeyboardInterrupt("Stopped by ESC key")
+            if coord_key in coordinates:
+                x, y = coordinates[coord_key]
+                pyautogui.moveTo(x, y, duration=config['moveDelay'])
+                for _ in range(clicks):
+                    pyautogui.click()
+                    if self.stop_automation_flag:
+                        raise KeyboardInterrupt("Stopped by ESC key")
+
+        def type_text(text, delay=None):
+            if self.stop_automation_flag:
+                raise KeyboardInterrupt("Stopped by ESC key")
+            if text:
+                # Handle numeric IDs that might be floats
+                if isinstance(text, float) and text.is_integer():
+                    text = str(int(text))
+                elif not isinstance(text, str):
+                    text = str(text)
+                pyautogui.write(text, interval=delay or config['defaultDelay'])
+
+        def continue_form_registration():
+            try:
+                print("Continuing with form registration...")
+                safe_wait(0.2)
+                
+                # Transaction type
+                click_at('transactionTypeLoc')
+                safe_wait(0.2)
+                type_text(details['transactionType'])
+                
+                # Service type
+                press_tab_multiple(4)
+                safe_wait(0.1)
+                type_text(details['serviceType'])
+                
+                # Assign physician
+                click_at('asdLoc', clicks=2)
+                safe_wait(0.2)
+                type_text("asd")
+                pyautogui.press("enter")
+                
+                click_at('asdLoc2', clicks=2)
+                safe_wait(0.2)
+                
+                # Company name
+                click_at('companyNameLoc', clicks=2)
+                safe_wait(0.2)
+                type_text(details['companyName'])
+                pyautogui.press("enter")
+                
+                click_at('companyNameLoc2', clicks=2)
+                safe_wait(0.2)
+                
+                # Notes/remarks
+                click_at('notesRemarksLoc', clicks=1)
+                safe_wait(0.2)
+                press_tab_multiple(1)
+                type_text(details['notesRemarks'])
+                press_tab_multiple(1)
+                pyautogui.press('enter')
+                type_text("1")
+                press_tab_multiple(3)
+                pyautogui.press('enter')
+                
+                print("Form registration completed successfully!")
+                
+            except Exception as e:
+                print(f"Error in form registration: {e}")
+                raise
+
+        # Main automation sequence
+        try:
+            print(f"Starting automated registration for ID: {details['idNumber']}")
+            safe_wait(config['startUpDelay'])
+            
+            # Open new window
+            pyautogui.hotkey('ctrl', 'n')
+            safe_wait(0.5)
+            
+            # Navigate and enter ID
+            press_tab_multiple(2)
+            pyautogui.press('enter')
+            press_tab_multiple(2)
+            type_text(details['idNumber'])
+            pyautogui.press('tab')
+            safe_wait()
+            press_tab_multiple(2, 0.2)
+            pyautogui.press('enter')
+            
+            # Wait for system response
+            print("Waiting for system response...")
+            safe_wait(2)
+            
+            # Image detection and flow control
+            try:
+                # Check for different system states
+                image_files = ['noRecordFound.png', 'useExistingRecord.png', 'withOutstandingBalance.png', 'outpatientRegistrationForm.png']
+                found_images = {}
+                
+                for img_file in image_files:
+                    try:
+                        if os.path.exists(img_file):
+                            location = pyautogui.locateOnScreen(img_file, confidence=0.8)
+                            if location:
+                                found_images[img_file] = location
+                                print(f"Found {img_file} at {location}")
+                    except pyautogui.ImageNotFoundException:
+                        continue
+                    except Exception as e:
+                        print(f"Error checking {img_file}: {e}")
+                
+                # Handle different scenarios based on found images
+                if 'noRecordFound.png' in found_images:
+                    print("No record found - cancelling operation")
+                    pyautogui.moveTo(0, 0)  # Trigger failsafe
+                    return
+                    
+                elif 'useExistingRecord.png' in found_images:
+                    print("Using existing record")
+                    press_tab_multiple(1)
+                    pyautogui.press('enter')
+                    safe_wait(2)
+                    
+                    # Check for outstanding balance after using existing record
+                    try:
+                        balance_location = pyautogui.locateOnScreen('withOutstandingBalance.png', confidence=0.8)
+                        if balance_location:
+                            print("Outstanding balance found after existing record")
+                            pyautogui.click(924, 641)
+                            press_tab_multiple(1)
+                            pyautogui.press('enter')
+                            safe_wait(1)
+                    except:
+                        pass
+                    
+                    continue_form_registration()
+                    return
+                    
+                elif 'withOutstandingBalance.png' in found_images:
+                    print("Outstanding balance detected")
+                    pyautogui.click(924, 641)
+                    press_tab_multiple(1)
+                    pyautogui.press('enter')
+                    safe_wait(1)
+                    continue_form_registration()
+                    return
+                    
+                elif 'outpatientRegistrationForm.png' in found_images:
+                    print("Outpatient registration form detected")
+                    continue_form_registration()
+                    return
+                    
+                else:
+                    print("No recognized state found - proceeding with default registration")
+                    safe_wait(2)
+                    
+                    # Try one more time with lower confidence
+                    try:
+                        for img_file in image_files:
+                            if os.path.exists(img_file):
+                                location = pyautogui.locateOnScreen(img_file, confidence=0.7)
+                                if location:
+                                    print(f"Found {img_file} on retry")
+                                    if 'noRecordFound' in img_file:
+                                        pyautogui.moveTo(0, 0)
+                                        return
+                                    elif 'useExistingRecord' in img_file:
+                                        press_tab_multiple(1)
+                                        pyautogui.press('enter')
+                                        safe_wait(3)
+                                    elif 'withOutstandingBalance' in img_file:
+                                        pyautogui.click(924, 641)
+                                        press_tab_multiple(1)
+                                        pyautogui.press('enter')
+                                        safe_wait(1)
+                                    break
+                    except:
+                        pass
+                    
+                    continue_form_registration()
+                    
+            except Exception as e:
+                print(f"Error in image detection: {e}")
+                print("Proceeding with default registration")
+                continue_form_registration()
+                
+        except pyautogui.FailSafeException:
+            print("Automation stopped by failsafe (mouse moved to corner)")
+            self.stop_batch_if_running()
+            
+        except KeyboardInterrupt as e:
+            print(f"Automation interrupted: {e}")
+            self.stop_batch_if_running()
+            
+        except Exception as e:
+            print(f"Unexpected error in automation: {e}")
+            # Continue with batch processing even if one entry fails
+            
+        finally:
+            self.listener_active = False
+            print(f"Automation completed for ID: {details['idNumber']}")
+
+
+
+
+
+
     def stop_batch_if_running(self):
         """Helper method to stop batch processing"""
         if self.is_batch_running:
@@ -936,6 +1175,124 @@ class AutoGuiApp(tb.Window):
             self.buttons["startBatch"].config(state='normal')
             self.buttons["stopBatch"].config(state='disabled')
             self.listener_active = False
+
+    def handle_charging_services(self, details):
+        coordinates = {
+            'xy1': (237, 890), 'xy2': (268, 881), 'xy3': (591, 182),
+            'xy4': (215, 893), 'xy5': (249, 927), 'xy6': (561, 184),
+            'xy7': (239, 966), 'transactionTypeLoc': (490, 582),
+            'serviceTypeLoc': (925, 478), 'asdLoc': (260, 881),
+            'asdLoc2': (592, 184), 'companyNameLoc': (265, 918),
+            'companyNameLoc2': (611, 184), 'notesRemarksLoc': (269, 962),
+        }
+        
+        config = {
+            'defaultDelay': 0.1, 'tabDelay': 0.1,
+            'moveDelay': 0.5, 'startUpDelay': 2
+        }
+
+        def safe_wait(duration=None):
+            if self.stop_automation_flag:
+                raise KeyboardInterrupt("Stopped by ESC key")
+            time.sleep(duration or config['defaultDelay'])
+
+        def press_tab_multiple(count, delay=None):
+            for _ in range(count):
+                if self.stop_automation_flag:
+                    raise KeyboardInterrupt("Stopped by ESC key")
+                pyautogui.press('tab')
+                safe_wait(delay or config['tabDelay'])
+
+        def click_at(coord_key, clicks=1):
+            if self.stop_automation_flag:
+                raise KeyboardInterrupt("Stopped by ESC key")
+            if coord_key in coordinates:
+                x, y = coordinates[coord_key]
+                pyautogui.moveTo(x, y, duration=config['moveDelay'])
+                for _ in range(clicks):
+                    pyautogui.click()
+                    if self.stop_automation_flag:
+                        raise KeyboardInterrupt("Stopped by ESC key")
+
+        def type_text(text, delay=None):
+            if self.stop_automation_flag:
+                raise KeyboardInterrupt("Stopped by ESC key")
+            if text:
+                # Handle numeric IDs that might be floats
+                if isinstance(text, float) and text.is_integer():
+                    text = str(int(text))
+                elif not isinstance(text, str):
+                    text = str(text)
+                pyautogui.write(text, interval=delay or config['defaultDelay'])
+        try:
+            print("Starting charging services...")
+            pyautogui.click(1671, 564)
+            safe_wait(1)
+            
+            type_text("nu")
+            safe_wait(2)
+            
+            pyautogui.click(575, 187)
+            pyautogui.click(575, 187)
+            safe_wait(5)
+            
+            pyautogui.click(349, 859)
+            safe_wait(1)
+            pyautogui.click(592, 153)
+            safe_wait(1)
+            
+            notes_remarks = details['notesRemarks']
+            
+            def final_step():
+                pyautogui.click(1473, 1010)
+                safe_wait(1)
+                type_text("1")
+                pyautogui.press('enter')
+                pyautogui.click(1117,548)
+                safe_wait(5)
+                pyautogui.press('enter')
+                
+
+                
+            
+            # Handle different charge types
+            consultation_charges = ["fc, consult", "fc, ff consult", "fc, ff pre-employment", "fc, ftw", "fc, ff ape","ftp"]
+            antigen_charges = ["fc, consult, antigen", "fc, ftw, antigen"]
+            
+            if notes_remarks in consultation_charges:
+                type_text("consultation fee")
+                safe_wait(1)
+                pyautogui.click(283, 231)
+                safe_wait(1)
+                pyautogui.press('enter')
+                final_step()
+                
+                
+            elif notes_remarks in antigen_charges:
+                # First charge: consultation fee
+                type_text("consultation fee")
+                safe_wait(1)
+                pyautogui.click(283, 231)
+                safe_wait(1)
+                
+                # Second charge: antigen
+                pyautogui.click(592, 153)
+                safe_wait(1)
+                pyautogui.hotkey('ctrl', 'a')
+                safe_wait(0.5)
+                type_text("( won")
+                safe_wait(1)
+                pyautogui.click(283, 231)
+                safe_wait(1)
+                pyautogui.press('enter')
+                final_step()
+                
+            
+            print("Charging services completed successfully!")
+            
+        except Exception as e:
+            print(f"Error in charging services: {e}")
+
 
 if __name__ == "__main__":
     app = AutoGuiApp()
