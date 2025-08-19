@@ -1,0 +1,154 @@
+google service account packages for manipulating google sheet
+    import os
+    import io
+    import time
+    import datetime
+    import win32print
+    import win32api
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
+    from googleapiclient.http import MediaIoBaseDownload
+    from openpyxl import Workbook, load_workbook
+google sheet id = "1rw1_195wpOkY76XUH40-k_7VO_bM0cuMyqcqU8bGyn0"
+
+other packages are pyautogui opneCv and other recommended automation of the application 
+
+After Opening HIS Bizbox
+
+Procedure 2: Registration
+    "1m = 1 minute"
+    images location = in the same project folder, folder name = "forAutomationImages"
+
+-1x Click(46, 867)
+-Ctrl + N
+-Detect a000img.png (1m timeout)
+-2x Tab
+-Detect a001img.png (1m timeout)
+-2x Tab
+-Type "ID Number"
+-3x Tab
+-ENTER
+-Detect a002img.png (1m timeout)
+    -if a002img.png detected
+        -CANCEL whole Procedure
+    -else Continue
+-Detect a003img.png (1m timeout)
+-1x Tab
+-ENTER
+-Detect a004img.png (1m timeout)
+    -if a004img.png detected
+        -CANCEL whole Procedure
+    -else Continue
+-Detect a005img.png and a006img.png (1m timeout)
+    -if a005img.png detected
+        -1x Tab
+        -ENTER
+    -if a006img.png detected
+        -Continue next step
+-Detect a007img.png (1m timeout)
+-1x Click (456, 582)
+-Type "Transaction Type"
+-4x Tab
+-Type "Service Type"
+-1x Click (280, 880)
+-Detect a008img.png (1m timeout)
+-1x Click (267, 875)
+-Detect a009img.png (1m timeout)
+-Type "asd"
+-ENTER
+-2x Click (150, 185)
+-1x Click (255, 931)
+-Detect a010img.png (1m timeout)
+-1x Click (268, 912)
+-Detect a011img.png (1m timeout)
+-Type "Company Name"
+-2x Click (564, 182)
+-1x Click (274, 963)
+-Type "Remarks"
+-1x Tab
+-ENTER
+-Type "1"
+-ENTER
+
+Column C "Transaction" type dependent
+def transaction_type_dependent(self):
+        """Update dependent Transaction type, Service Type, Remarks"""
+        try:
+            
+            # Mapping for registration types
+            type_mappings = {
+                "Consultation": {
+                    "transactionType": "consultation",
+                    "serviceType": "consultation",
+                    "notesRemarks": "consult"
+                },
+                "Follow-up Consultation": {
+                    "transactionType": "follow-up consultation",
+                    "serviceType": "consultation",
+                    "notesRemarks": "ff consult"
+                },
+                "Fit to Work": {
+                    "transactionType": "fit to work",
+                    "serviceType": "clearance",
+                    "notesRemarks": "ftw"
+                },
+                "Annual Physical Exam": {
+                    "transactionType": "annual physical examination",
+                    "serviceType": "annual physical examination",
+                    "notesRemarks": "ape"
+                },
+                "Follow Up Annual Physical Exam": {
+                    "transactionType": "annual physical examination",
+                    "serviceType": "annual physical examination",
+                    "notesRemarks": "ff ape"
+                },
+                "Fit to play": {
+                    "transactionType": "fit to play",
+                    "serviceType": "clearance",
+                    "notesRemarks": "ftp"
+                }
+            }
+
+allowed Column C "Transaction" to Register in Bixbox HIS
+-Consultation
+-Follow-up Consultation
+-Fit to Work
+-Annual Physical Exam
+-Follow Up Annual Physical Exam
+-Fit to play
+
+google sheet ForRegistration Column Headers:
+Column A = Time Stamp
+Column B = ID Number
+Column C = Transaction
+Column D = Last Name
+Column E = First Name
+Column F = Middle Name
+Column G = Suffix
+Column H = Birthdate
+Column I = Gender
+Column J = Contact Number
+Column K = Email Address
+Column L = Civil Status
+Column M = Company
+Column N = Company Department
+Column O = Symptoms
+Column P = HR Reqruiter
+Column Q = Antigen Status
+Column R = Hiring Status
+Column Q = PDF Status
+
+Now the plan for step by step execution
+1. Open the bizbox, which is in file a00OpeningBizbox.py. It executes well the opening of Bizbox application, use it.
+2. Collect the data to register from google sheet with the provided sheet ID, Only collect that data of registered in current date Column A "Time Stamp" 
+3. Execute Procedure 2 Registration on 10 User that's in the data with valid "Transaction" Column C
+4. After 10 registration of User details, close the Bizbox application
+5. Then repeat 1
+
+- this is a script that always run in the background and detects if there is a new registered user details in the google sheet
+- always monitor and mark the user details that registered in the bizbox to avoid duplication 
+- Here is the Columns that you will use in automation of Bizbox
+    Column B - ID Number
+    Column C - based on the valid transaction mapping
+    Column M = Company
+
